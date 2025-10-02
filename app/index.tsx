@@ -30,14 +30,50 @@ export default function Calculator() {
   const handleNumberPress = (num: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    if (display === "0" || result !== "") {
+    const lastChar = expression.slice(-1);
+    const isLastCharOperator = ["+", "−", "×", "÷"].includes(lastChar);
+    const lastNumberMatch = expression.match(/[\d.]+$/);
+    const lastNumber = lastNumberMatch ? lastNumberMatch[0] : null;
+
+    // Jika sebelumnya menekan '=' dan ada result, mulai expression baru
+    if (result !== "") {
       setDisplay(num);
-      setExpression(result !== "" ? num : expression + num);
+      setExpression(num);
       setResult("");
-    } else {
-      setDisplay(display + num);
-      setExpression(expression + num);
+      return;
     }
+
+    // Jika baru memulai angka setelah operator, append normal
+    if (isLastCharOperator) {
+      setDisplay(num);
+      setExpression(expression + num);
+      return;
+    }
+
+    // Jika tidak ada lastNumber (mis. expression kosong)
+    if (!lastNumber) {
+      // Jika display = "0" dan tekan digit non-zero -> ganti 0 dengan digit
+      if (display === "0") {
+        setDisplay(num);
+        setExpression(num);
+      } else {
+        // kondisi normal: append
+        setDisplay(display + num);
+        setExpression(expression + num);
+      }
+      return;
+    }
+
+    // Jika angka yang sedang diketik hanya "0" tanpa desimal, ganti 0 dengan digit baru
+    if (lastNumber === "0" && !lastNumber.includes(".")) {
+      setDisplay(num);
+      setExpression(expression.slice(0, -1) + num);
+      return;
+    }
+
+    // default: append digit
+    setDisplay(display === "0" ? num : display + num);
+    setExpression(expression + num);
   };
 
   const handleOperationPress = (op: string) => {
@@ -45,11 +81,21 @@ export default function Calculator() {
 
     if (result !== "") {
       setExpression(result + op);
-      setDisplay(op);
+      setDisplay(result);
       setResult("");
     } else {
-      setExpression(expression + op);
-      setDisplay(op);
+      // Cek apakah karakter terakhir adalah operator
+      const lastChar = expression.slice(-1);
+      const isLastCharOperator = ["+", "−", "×", "÷"].includes(lastChar);
+
+      if (isLastCharOperator) {
+        // Ganti operator terakhir dengan operator baru
+        setExpression(expression.slice(0, -1) + op);
+      } else {
+        // Tambahkan operator baru
+        setExpression(expression + op);
+      }
+      // Display tidak berubah, tetap menampilkan angka terakhir
     }
   };
 
