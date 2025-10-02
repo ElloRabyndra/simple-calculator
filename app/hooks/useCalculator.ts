@@ -29,7 +29,7 @@ export const useCalculator = () => {
       return;
     }
 
-    // Jika tidak ada lastNumber (mis. expression kosong)
+    // Jika tidak ada lastNumber 
     if (!lastNumber) {
       // Jika display = "0" dan tekan digit non-zero -> ganti 0 dengan digit
       if (display === "0") {
