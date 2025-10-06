@@ -14,6 +14,7 @@ export default function Calculator() {
     handleClear,
     handleDecimal,
     handleBackspace,
+    handleParenthesesPress,
   } = useCalculator();
 
   return (
@@ -21,7 +22,7 @@ export default function Calculator() {
       <StatusBar barStyle="dark-content" />
       <View className="justify-end flex-1 px-5 pb-12 bg-gradient-to-b from-blue-50 to-blue-100">
         <Display expression={expression} result={result} display={display} />
-        
+
         <ButtonGrid
           onNumberPress={handleNumberPress}
           onOperationPress={handleOperationPress}
@@ -29,6 +30,7 @@ export default function Calculator() {
           onClear={handleClear}
           onDecimal={handleDecimal}
           onBackspace={handleBackspace}
+          onParenthesesPress={handleParenthesesPress}
         />
       </View>
     </View>

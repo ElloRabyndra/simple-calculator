@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
-import { calculate, getLastNumber, hasDecimal, isOperator, shouldReplaceZero } from "../utils/calculator";
+import { calculate, getLastNumber, hasDecimal, isOperator, shouldReplaceZero, countOpenParentheses } from "../utils/calculator";
 
 export const useCalculator = () => {
   const [display, setDisplay] = useState("0");
@@ -19,6 +19,13 @@ export const useCalculator = () => {
       setDisplay(num);
       setExpression(num);
       setResult("");
+      return;
+    }
+
+    // Jika karakter terakhir adalah ')', tambahkan operator × otomatis
+    if (lastChar === ")") {
+      setDisplay(num);
+      setExpression(expression + "×" + num);
       return;
     }
 
@@ -67,6 +74,11 @@ export const useCalculator = () => {
       const lastChar = expression.slice(-1);
       const isLastCharOperator = isOperator(lastChar);
 
+      // Tidak bisa menambahkan operator jika expression kosong atau karakter terakhir adalah '('
+      if (expression === "" || lastChar === "(") {
+        return;
+      }
+
       if (isLastCharOperator) {
         // Ganti operator terakhir dengan operator baru
         setExpression(expression.slice(0, -1) + op);
@@ -75,6 +87,41 @@ export const useCalculator = () => {
         setExpression(expression + op);
       }
       // Display tidak berubah, tetap menampilkan angka terakhir
+    }
+  };
+
+  const handleParenthesesPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    const lastChar = expression.slice(-1);
+    const openCount = countOpenParentheses(expression);
+
+    // Jika ada result, mulai expression baru dengan '('
+    if (result !== "") {
+      setExpression("(");
+      setDisplay("(");
+      setResult("");
+      return;
+    }
+
+    // Jika expression kosong atau karakter terakhir adalah operator atau '(', tambahkan '('
+    if (
+      expression === "" ||
+      isOperator(lastChar) ||
+      lastChar === "("
+    ) {
+      setExpression(expression + "(");
+      setDisplay("(");
+    }
+    // Jika ada '(' yang belum ditutup dan karakter terakhir adalah angka atau ')', tambahkan ')'
+    else if (openCount > 0 && (lastChar === ")" || /\d/.test(lastChar))) {
+      setExpression(expression + ")");
+      setDisplay(")");
+    }
+    // Jika karakter terakhir adalah angka dan tidak ada '(' yang terbuka, tambahkan '×('
+    else if (/\d/.test(lastChar)) {
+      setExpression(expression + "×(");
+      setDisplay("(");
     }
   };
 
@@ -98,12 +145,25 @@ export const useCalculator = () => {
   const handleDecimal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+    const lastChar = expression.slice(-1);
+    
+    // Tidak bisa menambahkan decimal setelah ')'
+    if (lastChar === ")") {
+      return;
+    }
+
     // Check if current number already has decimal
     const lastNumber = getLastNumber(expression) || display;
 
     if (!hasDecimal(lastNumber)) {
-      setDisplay(display + ".");
-      setExpression(expression + ".");
+      // Jika karakter terakhir adalah operator atau '(', tambahkan '0.' terlebih dahulu
+      if (isOperator(lastChar) || lastChar === "(") {
+        setDisplay("0.");
+        setExpression(expression + "0.");
+      } else {
+        setDisplay(display + ".");
+        setExpression(expression + ".");
+      }
     }
   };
 
@@ -118,9 +178,17 @@ export const useCalculator = () => {
       const newExpression = expression.slice(0, -1);
       setExpression(newExpression);
 
-      // Update display to show last number or operator
+      // Update display to show last number or operator or parenthesis
       const match = newExpression.match(/[\d.]+$/);
-      setDisplay(match ? match[0] : newExpression.slice(-1) || "0");
+      const lastChar = newExpression.slice(-1);
+      
+      if (match) {
+        setDisplay(match[0]);
+      } else if (lastChar === "(" || lastChar === ")") {
+        setDisplay(lastChar);
+      } else {
+        setDisplay(lastChar || "0");
+      }
     } else {
       setDisplay("0");
     }
@@ -136,5 +204,6 @@ export const useCalculator = () => {
     handleClear,
     handleDecimal,
     handleBackspace,
+    handleParenthesesPress,
   };
 };

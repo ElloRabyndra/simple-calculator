@@ -9,6 +9,7 @@ interface ButtonGridProps {
   onClear: () => void;
   onDecimal: () => void;
   onBackspace: () => void;
+  onParenthesesPress: () => void;
 }
 
 export const ButtonGrid = ({
@@ -18,6 +19,7 @@ export const ButtonGrid = ({
   onClear,
   onDecimal,
   onBackspace,
+  onParenthesesPress,
 }: ButtonGridProps) => {
   return (
     <View className="gap-3">
@@ -28,6 +30,13 @@ export const ButtonGrid = ({
           onPress={onClear}
           bg={BUTTON_COLORS.clear.bg}
           textColor={BUTTON_COLORS.clear.text}
+        />
+        <Button
+          value="( )"
+          onPress={onParenthesesPress}
+          bg={BUTTON_COLORS.parentheses.bg}
+          textColor={BUTTON_COLORS.parentheses.text}
+          fontSize={24}
         />
         <Button
           value="⌫"

@@ -26,4 +26,8 @@ export const BUTTON_COLORS = {
     bg: "#10B981",
     text: "#FFFFFF",
   },
+  parentheses: {
+    bg: "#fcc800",
+    text: "#FFFFFF",
+  },
 } as const;
