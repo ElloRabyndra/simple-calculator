@@ -1,6 +1,13 @@
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
-import { calculate, getLastNumber, hasDecimal, isOperator, shouldReplaceZero, countOpenParentheses } from "../utils/calculator";
+import {
+  calculate,
+  countOpenParentheses,
+  getLastNumber,
+  hasDecimal,
+  isOperator,
+  shouldReplaceZero,
+} from "../utils/calculator";
 
 export const useCalculator = () => {
   const [display, setDisplay] = useState("0");
@@ -36,7 +43,7 @@ export const useCalculator = () => {
       return;
     }
 
-    // Jika tidak ada lastNumber 
+    // Jika tidak ada lastNumber
     if (!lastNumber) {
       // Jika display = "0" dan tekan digit non-zero -> ganti 0 dengan digit
       if (display === "0") {
@@ -105,11 +112,7 @@ export const useCalculator = () => {
     }
 
     // Jika expression kosong atau karakter terakhir adalah operator atau '(', tambahkan '('
-    if (
-      expression === "" ||
-      isOperator(lastChar) ||
-      lastChar === "("
-    ) {
+    if (expression === "" || isOperator(lastChar) || lastChar === "(") {
       setExpression(expression + "(");
       setDisplay("(");
     }
@@ -146,7 +149,7 @@ export const useCalculator = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const lastChar = expression.slice(-1);
-    
+
     // Tidak bisa menambahkan decimal setelah ')'
     if (lastChar === ")") {
       return;
@@ -181,7 +184,7 @@ export const useCalculator = () => {
       // Update display to show last number or operator or parenthesis
       const match = newExpression.match(/[\d.]+$/);
       const lastChar = newExpression.slice(-1);
-      
+
       if (match) {
         setDisplay(match[0]);
       } else if (lastChar === "(" || lastChar === ")") {
